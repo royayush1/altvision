@@ -1,0 +1,259 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>AltVision Robust Test (Stable)</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<style>
+  body { font: 14px/1.5 system-ui, sans-serif; margin: 0; background: #f7f7fb; color: #222; }
+  header, section { max-width: 920px; margin: 0 auto; padding: 20px; }
+  header { padding-top: 28px; }
+  h1 { margin: 0 0 8px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; align-items: start; }
+  .card { background: #fff; border: 1px solid #e7e7ef; border-radius: 12px; padding: 12px; }
+  .card > *:first-child { margin-top: 0; }
+  .card > *:last-child { margin-bottom: 0; }
+  figure { margin: 0; }
+  figcaption { font-size: 12px; color: #555; margin-top: 6px; }
+  .bgbox { width: 420px; max-width: 100%; height: 220px; background-size: cover; background-position: center; border-radius: 10px; border: 1px solid #ddd; }
+  .note { font-size: 12px; color: #666; }
+  .spacer { height: 600px; display: grid; place-items: center; color: #777; background: linear-gradient(180deg,#fafafa,#f0f0f6); border-top: 1px dashed #ddd; border-bottom: 1px dashed #ddd; }
+  .pill { display: inline-block; font-size: 12px; padding: 2px 8px; border-radius: 999px; background: #eef5ff; color: #235; border: 1px solid #d6e8ff; margin-left: 6px; }
+  .ok { background: #effaf1; border-color: #cfeeda; color: #174b2b; }
+  .warn { background: #fff8e5; border-color: #ffe7a8; color: #5a3c00; }
+  .err { background: #ffefef; border-color: #ffd2d2; color: #7d1212; }
+  .toolbar { position: sticky; top: 0; background: #fff; border-bottom: 1px solid #eee; padding: 10px 20px; z-index: 2; }
+  .toolbar button { padding: 6px 10px; border: 1px solid #ccc; border-radius: 8px; cursor: pointer; margin-right: 8px; }
+</style>
+</head>
+<body>
+  <header>
+    <h1>AltVision Robust Test <span class="pill ok">Stable sources</span></h1>
+    <p class="note">Mix of Picsum (CORS-OK), Wikimedia originals, data URI, SVG, and broken URL.</p>
+  </header>
+
+  <div class="toolbar">
+    <button id="scrollLazy">Scroll to lazy section</button>
+    <button id="appendLater">Append late nodes</button>
+  </div>
+
+  <!-- 1) Basic -->
+  <section>
+    <h2>1) Basic</h2>
+    <div class="grid">
+      <div class="card">
+        <h3>Has ALT <span class="pill ok">skip</span></h3>
+        <img
+          src="https://picsum.photos/id/1015/640/360.jpg"
+          width="420"
+          alt="Mountain range with river valley at sunrise" />
+        <p class="note">Should not be targeted.</p>
+      </div>
+
+      <div class="card">
+        <h3>Decorative <span class="pill ok">skip</span></h3>
+        <img
+          src="https://picsum.photos/id/1025/48/48.jpg"
+          width="48" height="48"
+          alt="" role="presentation" />
+        <p class="note">Empty alt + role=presentation.</p>
+      </div>
+
+      <div class="card">
+        <h3>Missing ALT <span class="pill warn">include</span></h3>
+        <img
+          src="https://picsum.photos/id/1021/640/427.jpg"
+          width="420" />
+        <p class="note">No alt → should be included.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2) Context -->
+  <section>
+    <h2>2) Context (caption & described-by)</h2>
+    <div class="grid">
+      <figure class="card">
+        <h3>Figure with caption</h3>
+        <img id="fig1"
+          src="https://upload.wikimedia.org/wikipedia/commons/f/f1/Vultures_gyps.jpg"
+          width="420" alt="" />
+        <figcaption id="cap1">Griffon vultures perched on a branch.</figcaption>
+        <p class="note">Caption should be included in your context string.</p>
+      </figure>
+
+      <div class="card">
+        <h3>ARIA described-by</h3>
+        <img
+          aria-describedby="d1 d2"
+          src="https://upload.wikimedia.org/wikipedia/commons/9/9a/Gull_portrait_ca_usa.jpg"
+          width="420" alt="" />
+        <p id="d1" class="note">A seagull in profile.</p>
+        <p id="d2" class="note">Photographed on the California coast.</p>
+        <p class="note">Expect both descriptions to be concatenated.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3) Responsive -->
+  <section>
+    <h2>3) Responsive (<code>srcset</code>, <code>picture</code>)</h2>
+    <div class="grid">
+      <div class="card">
+        <h3>srcset/sizes</h3>
+        <img
+          width="600"
+          src="https://picsum.photos/id/1003/600/400.jpg"
+          srcset="
+            https://picsum.photos/id/1003/320/213.jpg 320w,
+            https://picsum.photos/id/1003/600/400.jpg 600w,
+            https://picsum.photos/id/1003/1200/800.jpg 1200w"
+          sizes="(max-width: 680px) 100vw, 600px"
+          alt="" />
+        <p class="note">Your code should use <code>currentSrc</code>.</p>
+      </div>
+
+      <div class="card">
+        <h3>picture (WebP → JPEG fallback)</h3>
+        <picture>
+          <source type="image/webp" srcset="https://picsum.photos/id/1020/640/427.webp 1x" />
+          <img width="640" height="427"
+               src="https://picsum.photos/id/1020/640/427.jpg"
+               alt="" />
+        </picture>
+        <p class="note">Browser may choose WebP; you’ll fetch bytes from whatever it chose.</p>
+      </div>
+    </div>
+  </section>
+
+  <div class="spacer">Scroll to load lazy elements…</div>
+
+  <!-- 4) Lazy -->
+  <section id="lazy-zone">
+    <h2>4) Lazy (data-src / data-bg)</h2>
+    <div class="grid">
+      <div class="card">
+        <h3>Lazy IMG</h3>
+        <img class="lazy" width="640" height="427"
+             data-src="https://picsum.photos/id/1036/640/427.jpg"
+             alt="" />
+        <p class="note">No <code>src</code> until in view.</p>
+      </div>
+
+      <div class="card">
+        <h3>Lazy BG (role=img, needs aria-label)</h3>
+        <div class="bgbox lazy-bg" role="img"
+             data-bg="https://picsum.photos/id/1040/640/360.jpg"></div>
+        <p class="note">Your collector should include this BG (no aria-label).</p>
+      </div>
+
+      <div class="card">
+        <h3>BG already labeled (skip)</h3>
+        <div class="bgbox" role="img" aria-label="City skyline at dusk"
+             style="background-image:url('https://picsum.photos/id/1041/640/360.jpg');"></div>
+        <p class="note">Should be skipped.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5) Data URI + SVG + broken -->
+  <section>
+    <h2>5) Data URI, SVG, broken URL</h2>
+    <div class="grid">
+      <div class="card">
+        <h3>Data URI PNG (valid)</h3>
+        <img width="280" height="160" alt=""
+             src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAQCAYAAADNo/U5AAAACXBIWXMAAAsSAAALEgHS3X78AAAAI0lEQVQ4y2NgGAVUEGJg+M9AB0YwGoaBhmEwGkZ0gQFQAAALk0Qd8n9+qsAAAAAElFTkSuQmCC" />
+        <p class="note">Small, valid PNG should decode fine.</p>
+      </div>
+
+      <div class="card">
+        <h3>Direct SVG (may trigger fallback)</h3>
+        <img width="420"
+             src="https://upload.wikimedia.org/wikipedia/commons/0/02/SVG_logo.svg"
+             alt="" />
+        <p class="note">Your new <em>text-only</em> fallback should handle decode failure.</p>
+      </div>
+
+      <div class="card">
+        <h3>Broken link</h3>
+        <img width="420"
+             src="https://example.com/not-a-real-image-12345.jpg"
+             alt="" />
+        <p class="note">Expect a fetch error card.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 6) Appended late -->
+  <section id="late-zone">
+    <h2>6) Appended late</h2>
+    <div class="grid" id="late-grid">
+      <div class="card">
+        <h3>Click the toolbar button</h3>
+        <p class="note">We’ll append an IMG without alt and a BG without label.</p>
+      </div>
+    </div>
+  </section>
+
+  <script>
+  // Lazy loader via IntersectionObserver
+  const io = ('IntersectionObserver' in window)
+    ? new IntersectionObserver(entries => {
+        for (const e of entries) {
+          if (!e.isIntersecting) continue;
+          const el = e.target;
+
+          if (el.tagName === 'IMG' && el.dataset.src) {
+            el.src = el.dataset.src;
+            el.removeAttribute('data-src');
+            io.unobserve(el);
+          }
+
+          if (el.classList.contains('lazy-bg') && el.dataset.bg) {
+            el.style.backgroundImage = `url("${el.dataset.bg}")`;
+            el.removeAttribute('data-bg');
+            el.classList.remove('lazy-bg');
+            io.unobserve(el);
+          }
+        }
+      }, { rootMargin: '200px 0px' })
+    : null;
+
+  document.querySelectorAll('img.lazy, .lazy-bg').forEach(el => io?.observe(el));
+
+  // Toolbar buttons
+  document.getElementById('scrollLazy')?.addEventListener('click', () => {
+    document.getElementById('lazy-zone')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+
+  document.getElementById('appendLater')?.addEventListener('click', () => {
+    const grid = document.getElementById('late-grid');
+    if (!grid) return;
+
+    const card1 = document.createElement('div');
+    card1.className = 'card';
+    card1.innerHTML = `
+      <h3>Late IMG (no alt)</h3>
+      <img width="640" height="360"
+           src="https://picsum.photos/id/1050/640/360.jpg" />
+      <p class="note">Inserted after load.</p>
+    `;
+
+    const card2 = document.createElement('div');
+    card2.className = 'card';
+    card2.innerHTML = `
+      <h3>Late BG (no label)</h3>
+      <div class="bgbox" role="img"
+           style="background-image:url('https://picsum.photos/id/1060/640/360.jpg');"></div>
+      <p class="note">Also appended late.</p>
+    `;
+
+    grid.appendChild(card1);
+    grid.appendChild(card2);
+  });
+  </script>
+</body>
+</html>
+
+
