@@ -115,30 +115,39 @@ async function normalizeImageBlob(blob){
 
 async function ensurePromptSession(){
   const opts = {
-    expectedInputs: [
-      {type: 'text', languages: ['en']},
-      {type: 'image'}
-    ],
-    expectedOutputs: [
-      {type: 'text', languages: ['en']}
-    ],
+    expectedInputs: [{type:'text', languages:['en']}, {type:'image'}],
+    expectedOutputs:[{type:'text', languages:['en']}],
     monitor(m){
-      m.addEventListener('downloadprogress', e => {
-        setStatus(`Downloading model... ${Math.round(e.loaded * 100)}%`);
+      m.addEventListener('downloadprogress', (e) => {
+        setStatus(`Downloading on-device model… ${Math.round(e.loaded*100)}%`);
       });
     }
   };
-  const availability = await LanguageModel.availability(opts);
-  if (availability === 'unavailable'){
-    throw new Error('Built-in model unavailable on this device (see chrome://on-device-internals).');
+
+  let avail;
+  try {
+    avail = await LanguageModel.availability(opts);
+  } catch (e) {
+    throw new Error(`Prompt API not available in this Chrome build/profile: ${e}`);
   }
+
+  setStatus(`Model availability: ${avail}`);
+
+  if (avail === 'unavailable') {
+    throw new Error(
+      'Built-in model unavailable. Fix: 1) ensure a valid trial token in manifest.json, ' +
+      '2) check chrome://on-device-internals (install/allow), 3) reload the extension.'
+    );
+  }
+
   if (!session){
-    setStatus('Preparing on-device model... (first time may take a few minutes)');
-    session = await LanguageModel.create(opts);
+    setStatus('Preparing on-device model…');
+    session = await LanguageModel.create(opts); 
     setStatus('Model ready');
   }
   return session;
 }
+
 
 async function ensureTranslator(to){
   if (!to || typeof Translator === 'undefined') return null;

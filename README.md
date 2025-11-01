@@ -70,5 +70,9 @@ Used to scan DOM, fetch images for local inference, and write alt/aria attribute
 4. Verify cards are produced, click **Copy**, and see alts written to DOM
 5. Toggle a non-English language and repeat
 
+## Links
+1. **Github**: https://github.com/royayush1/altvision.git
+2. **YouTube**:
+
 ## License
 MIT (see LICENSE)
