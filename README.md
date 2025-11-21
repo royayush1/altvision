@@ -1,4 +1,5 @@
 # AltVision — On-device AI Alt-Text Assistant (Chrome Built-in AI)
+(Please credit AltVision in About/README if you reuse substantial parts)
 
 **AltVision** is a Chrome Extension that scans any page for images and unlabeled background images, then generates concise, WCAG-quality alt text **entirely on-device** using Chrome’s built-in AI (Gemini Nano). Optional: translate the generated alt into your chosen language using the on-device **Translator API**. One click can also write the alt directly into the page (`alt=""` or `aria-label`).
 
